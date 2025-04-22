@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My stock</title>
+    
+    <style>
+        .submit-btn{
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #472dbb;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .submit-btn:hover{
+            background-color: #4565a0;
+        }
+        
+        p{
+            margin-top: 15px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #343a40;
+            margin-top: 20px;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0px 4px 8px rgb(255, 255, 255);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #000;
+            text-align: center;
+        }
+        th {
+            background-color: #d0d00b;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #4a90e2;
+        }
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: black;
+            background: #007bff;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        a:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Stock</h1>
+
+    <table>
+        <tr>
+            <th>Image</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Buying Price</th>
+            <th>Selling Price</th>
+            <th>Category</th>
+            <th>Quantity Type</th>
+        </tr>
+        <% products.forEach(order => { %>
+            <tr><form action="/delete" method="post">
+                <td>
+                    <% if (order.image) { %>
+                        <img src="<%= order.image %>" alt="Product Image" width="100">
+                    <% } else { %>
+                        No Image
+                    <% } %>
+                </td>                
+                <td><%= order.productName%></td>
+                <td><%= order.quantity %></td>
+                <td><%= order.buyingPrice %></td>
+                <td><%= order.sellingPrice %></td>
+                <td><%= order.category %></td>
+                <td><%= order.quantityType %></td>
+            </form>
+            </tr>
+        <% }) %>
+    </table>
+
+    <a href="/">Go Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Pannel</title>
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    
+    <div class="form-container-admin">
+        <h2>Admin Pannel</h2>
+        <form action="/admin" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="productName">ProductName:</label>
+                <input type="text" name="productName" id="productName" placeholder="Enter the productName" required autocomplete="off">
+            </div>
+            <div class="div form-group">
+                <label for="quantity">Quantity</label>
+                <input type="number" name="quantity" id="quantity" placeholder="quantity" required>
+            </div>
+            <div class="div form-group">
+                <label for="buyingPrice">BuyingPrice</label>
+                <input type="number" name="buyingPrice" id="buyingPrice" placeholder="buyingPrice" required>
+            </div>
+            <div class="div form-group">
+                <label for="sellingPrice">SellingPrice</label>
+                <input type="number" name="sellingPrice" id="sellingPrice" placeholder="sellingPrice" required>
+            </div>
+            <div class="div form-group">
+                <label for="category">Category</label>
+                <input type="String" name="category" id="category" placeholder="category" required>
+            </div>
+            <div class="div form-group">
+                <label for="quantityType">QuantityType</label>
+                <input type="String" name="quantityType" id="quantityType" placeholder="quantityType" required>
+            </div>
+            <div class="div form-group">
+                <label for="image">Product Image</label>
+                <input type="file" name="image" id="image" accept="image/png, image/jpeg" required>
+            </div>
+            <button type="submit" class="submit-btn">Add</button>
+        </form>
+        <p>Want to visit home? <a href="/">home</a></p>
+        <form action="/login" method="post" >
+            <p>To watch order <button type="submit">click</button></p>
+            <input type="hidden" name="which" id="which" value="1">
+        </form>
+        
+        <form action="/login" method="post" >
+            <p>To watch order <button type="submit">click</button></p>
+            <input type="hidden" name="which" id="which" value="2">
+        </form>
+    </div>
+</body>
+</html>

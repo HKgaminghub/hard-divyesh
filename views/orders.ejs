@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    
+    <style>
+        .submit-btn{
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #472dbb;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .submit-btn:hover{
+            background-color: #4565a0;
+        }
+        
+        p{
+            margin-top: 15px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #343a40;
+            margin-top: 20px;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0px 4px 8px white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: white;
+            background: #007bff;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        a:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Orders</h1>
+
+    <table>
+        <tr>
+            <th>User Name</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Address</th>
+            <th>Phone Number</th>
+            <th>Completed</th>
+        </tr>
+        <% orders.forEach(order => { %>
+            <tr><form action="/delete" method="post">
+                <td><%= order.userName %></td>
+                <td><%= order.productName %></td>
+                <td><%= order.quantity %></td>
+                <td><%= order.Address %></td>
+                <td><%= order.phoneNumber %></td>
+                <input type="hidden" name="id" id="id" value="<%= order._id %>">
+                <td><button type="submit" class="submit-btn">Delete</button></td>
+            </form>
+            </tr>
+        <% }) %>
+    </table>
+
+    <a href="/">Go Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .button-link {
+            background: none;
+            border: none;
+            color: yellow;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: inherit;
+            padding: 0;
+            display: inline;
+        }
+        
+        .button-link:hover {
+            color: #d0d00b;
+            text-decoration: none;
+        }
+        
+    </style>
+</head>
+<body>
+    
+    <div class="form-container">
+        <h2>Login</h2>
+        <form action="/login" method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" name="name" id="name" placeholder="Enter the name" required autocomplete="off">
+            </div>
+            <div class="div form-group">
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password" placeholder="password" required>
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+        </form>
+        <form action="/req-otp" method="post" >
+            <p><button type="submit" class="button-link">Forgotten Password?</button></p>
+        </form>
+        <p>Don't have account? <a href="/signup">signup</a></p>
+    </div>
+</body>
+</html>
