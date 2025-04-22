@@ -1,31 +1,26 @@
 const express = require('express');
-const app = express(); 
-const express = require('express');
+const app = express();
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const otpGenerator = require('otp-generator');
-
-const { adminCollection } = require("./confing"); 
-const { stockCollection } = require("./confing"); 
-const { orderCollection } = require("./confing"); 
-const { OTPCollection } = require("./confing"); 
-let USERNAME = "";
-
-
-
 const session = require("express-session");
+
+const { adminCollection } = require("./confing");
+const { stockCollection } = require("./confing");
+const { orderCollection } = require("./confing");
+const { OTPCollection } = require("./confing");
+
+let USERNAME = "";
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'hardbosamiya9b@gmail.com', 
-        pass: 'jsbw quqt tkul zoft' 
+        user: 'hardbosamiya9b@gmail.com',
+        pass: 'jsbw quqt tkul zoft'
     }
 });
-
-const session = require("express-session");
 
 app.use(session({
     secret: 'your_secret_key',
@@ -35,15 +30,12 @@ app.use(session({
 }));
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });    
+const upload = multer({ storage: storage });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
 app.set('view engine', 'ejs');
-
 app.use(express.static("public"));
-
 
 console.log("adminCollection Model:", adminCollection);
 console.log("stockCollection Model:", stockCollection);
@@ -52,8 +44,7 @@ console.log("OTPCollection Model:", OTPCollection);
 
 app.get("/", async (req, res) => {
     try {
-        const products = await stockCollection.find({}, { image: 1, buyingPrice:1, sellingPrice:1, productName:1 , productId:1}).limit(100);  // Fetch first 10 products (or adjust as needed)
-
+        const products = await stockCollection.find({}, { image: 1, buyingPrice:1, sellingPrice:1, productName:1 , productId:1}).limit(100);
         res.render("home", { products, USERNAME: req.session.username });
     } catch (error) {
         console.error(error);
@@ -75,31 +66,24 @@ app.get("/logout", (req, res) => {
                             document.getElementById('redirectForm').submit();
                         }, 1000);
                     </script>
-                    <form id="redirectForm" action="/" method="get">
-                    </form>
+                    <form id="redirectForm" action="/" method="get"></form>
                 </body>
             </html>
         `);
     });
 });
 
-
 app.get("/login", (req, res) => {
     res.render("login");
 });
 
-app.post("/orders", async (req,res) => {
+app.post("/orders", async (req, res) => {
     res.render("orders");
 });
 
-
-
-
-
 app.post("/order", async (req, res) => {
     const { productId } = req.body;
-
-    const product = await stockCollection.findById(productId); 
+    const product = await stockCollection.findById(productId);
 
     res.render("order", {
         productName : product.productName,
@@ -108,19 +92,14 @@ app.post("/order", async (req, res) => {
     });
 });
 
-
-
-
-
 app.post("/signup", async (req, res) => {
     try {
         const data = {
             name: req.body.name,
             password: req.body.password,
             email: " ",
-            userType: "user" 
+            userType: "user"
         };
-
 
         const existingUser = await adminCollection.findOne({ name: data.name });
 
@@ -128,15 +107,13 @@ app.post("/signup", async (req, res) => {
             return res.send("User already exists. Please choose a different name.");
         }
 
-
         const saltRounds = 10;
         data.password = await bcrypt.hash(data.password, saltRounds);
 
-    
         await adminCollection.create(data);
         console.log("User registered:", data.name);
 
-        res.redirect("/"); 
+        res.redirect("/");
     } catch (error) {
         console.error(error);
         res.status(500).send("Error registering user.");
@@ -147,7 +124,6 @@ app.get("/signup", async (req,res) => {
     return res.render("signup");
 });
 
-
 app.post("/login", async (req, res) => {
     if (req.body.which==1){
         const orders = await orderCollection.find({},{_id: 1, userName: 1,productName: 1, quantity: 1, Address: 1, phoneNumber: 1})
@@ -156,7 +132,7 @@ app.post("/login", async (req, res) => {
 
     if (req.body.which == 2) {
         const products = await stockCollection.find({}, { _id: 1, productName: 1, quantity: 1, buyingPrice: 1, sellingPrice: 1, category: 1, quantityType: 1, image: 1 });
-                
+
         const modifiedProducts = products.map(product => ({
             ...product._doc,
             image: product.image ? `data:image/png;base64,${product.image.toString('base64')}` : null
@@ -172,18 +148,14 @@ app.post("/login", async (req, res) => {
             return res.send("User not found.");
         }
 
-        
         const isPasswordMatch = await bcrypt.compare(req.body.password, user.password);
-        
+
         if (isPasswordMatch) {
             if(user.userType=="admin"){
                 req.session.username = req.body.name;
-
                 return res.render("admin");
-            }
-            else{
+            } else {
                 req.session.username = req.body.name;
-
                 return res.redirect("/");
             }
         } else {
@@ -198,7 +170,7 @@ app.post("/login", async (req, res) => {
 app.post("/admin", upload.single("image"), async (req, res) => {
     console.log("Headers:", req.headers);
     console.log("Request Body:", req.body);
-    console.log("Uploaded File:", req.file); 
+    console.log("Uploaded File:", req.file);
 
     if (!req.file) {
         return res.status(400).send("No image uploaded.");
@@ -219,7 +191,7 @@ app.post("/admin", upload.single("image"), async (req, res) => {
     return res.send("Product added successfully!");
 });
 
-app.post("/orderPlace", async (req, res)=>{
+app.post("/orderPlace", async (req, res) => {
     const data = {
         userName: req.session.username,
         productName: req.body.productName,
@@ -227,31 +199,28 @@ app.post("/orderPlace", async (req, res)=>{
         Address: req.body.Address,
         phoneNumber: req.body.phoneNumber
     }
-    const {phoneNumber} = req.body;
-    if (USERNAME==""){
+    const { phoneNumber } = req.body;
+
+    if (!req.session.username){
         res.send(`<html>
             <body>
                 <p>You are not logged in. So pls first login</p>
                 <script>
                     setTimeout(() => {
                         document.getElementById('redirectForm').submit();
-                    }, 1000); // 1-second delay
+                    }, 1000);
                 </script>
-                <form id="redirectForm" action="/login" method="get">
-                </form>
+                <form id="redirectForm" action="/login" method="get"></form>
             </body>
-        </html>`); 
-
-    }else{
-
-        if (phoneNumber.toString().length !==10){
-            return res.send("Ivalid phone number");
-        }else{
-            orderCollection.create(data);
+        </html>`);
+    } else {
+        if (phoneNumber.toString().length !== 10){
+            return res.send("Invalid phone number");
+        } else {
+            await orderCollection.create(data);
         }
-        return res.render("orderplaced")
+        return res.render("orderplaced");
     }
-
 });
 
 app.post("/req-otp", async (req,res) => {
@@ -259,40 +228,29 @@ app.post("/req-otp", async (req,res) => {
 });
 
 app.post("/send-otp", async (req, res) => {
-    // res.redirect("/");
     const name = req.body.user;
     const user = await adminCollection.findOne({ name });
 
     if(!user){
-        return res.send("The usernam dosn't esist ");
-    }
-    
-    if (user.email==" "){
-        return res.send("There is bo email registor with this.");
+        return res.send("The username doesn't exist");
     }
 
-    const otp = otpGenerator.generate(6, { 
-        digits: true, 
-        lowerCaseAlphabets: false, 
-        upperCaseAlphabets: false, 
-        specialChars: false 
-      });
-      
+    if (user.email == " "){
+        return res.send("There is no email registered with this.");
+    }
+
+    const otp = otpGenerator.generate(6, { digits: true, lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
     const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     console.log(otp);
 
-    const email = user.email; 
-    const deletes = await OTPCollection.deleteMany({ email: user.email });
-
+    await OTPCollection.deleteMany({ email: user.email });
     await OTPCollection.create({ email: user.email, otp: otpHash, expiresAt });
-
-
 
     const mailOptions = {
         from: 'hardbosamiya9b@gmail.com',
-        to: email,
+        to: user.email,
         subject: 'Your OTP Code',
         text: `Your OTP is ${otp}. It expires in 5 minutes.`
     };
@@ -303,99 +261,70 @@ app.post("/send-otp", async (req, res) => {
             return res.status(500).send("Error sending OTP");
         }
         console.log("OTP sent: " + info.response);
-        res.status(200).send(`<!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>OTP-Verification</title>
-                <link rel="stylesheet" href="/style.css">
-            </head>
+        res.status(200).send(`
+            <!DOCTYPE html>
+            <html>
+            <head><title>OTP-Verification</title><link rel="stylesheet" href="/style.css"></head>
             <body>
-                <div class="form-container-admin">
-                    <h2>Admin Panel</h2>
-                    <form action="/verify" method="post">
-                        <div class="form-group">
-                            <label for="OTP">OTP:</label>
-                            <input type="text" name="OTP" placeholder="Enter OTP" required autocomplete="off">
-                            <input type="hidden" name="email" value="${email}">
-                        </div>
-                        <button type="submit" class="submit-btn">Verify</button>
-                    </form>
-                </div>
+            <div class="form-container-admin">
+                <h2>Admin Panel</h2>
+                <form action="/verify" method="post">
+                    <input type="text" name="OTP" placeholder="Enter OTP" required>
+                    <input type="hidden" name="email" value="${user.email}">
+                    <button type="submit">Verify</button>
+                </form>
+            </div>
             </body>
             </html>`);
-            
+    });
 });
 
-});
-
-app.post("/verify", async (req,res) => {
-    const { OTP,email } = req.body;
-    
-    console.log(email);
-
+app.post("/verify", async (req, res) => {
+    const { OTP, email } = req.body;
     const otpHash = crypto.createHash('sha256').update(OTP).digest('hex');
-    const otpRecord = await OTPCollection.findOne({ email: email });
+    const otpRecord = await OTPCollection.findOne({ email });
 
-    if (!otpRecord || otpRecord.expiresAt < new Date() || otpHash!=otpRecord.otp ) {
+    if (!otpRecord || otpRecord.expiresAt < new Date() || otpHash !== otpRecord.otp) {
         return res.send("Invalid or expired OTP.");
-    }
-    else {
-        return res.send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New password</title>
-    <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-    <div class="form-container-admin">
-        <h2>Admin Pannel</h2>
-        <form action="/new" method="post" >
-            <div class="form-group">
-                <label for="OTP">New Password:</label>
-                <input type="text" name="password" id="password" placeholder="new password" required autocomplete="off">
+    } else {
+        return res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head><title>New password</title><link rel="stylesheet" href="/style.css"></head>
+            <body>
+            <div class="form-container-admin">
+                <h2>Admin Panel</h2>
+                <form action="/new" method="post">
+                    <input type="text" name="password" placeholder="New password" required>
+                    <input type="text" name="again" placeholder="Enter password again" required>
+                    <input type="hidden" name="email" value="${email}">
+                    <button type="submit">Change</button>
+                </form>
             </div>
-            
-            <div class="form-group">
-                <label for="OTP">Again:</label>
-                <input type="text" name="again" id="again" placeholder="Eneter Password" required autocomplete="off">
-                <input type="hidden" name="email" value="${email}">
-            </div>
-            <button type="submit" class="submit-btn">Verify</button>
-        </form>
-    </div>
-</body>
-</html>`);
+            </body>
+            </html>`);
     }
-
-
 });
 
-app.post("/new", async (req,res) => {
-    const newp = req.body.password;
-    const again = req.body.again;
-    const emails = req.body.email;
+app.post("/new", async (req, res) => {
+    const { password, again, email } = req.body;
 
-    if (newp==again){
-        const saltRounds = 10;
-        const hashPassword = await bcrypt.hash(again, saltRounds);
-        await adminCollection.findOneAndUpdate({email : emails}, {$set : {password: hashPassword}});
+    if (password === again) {
+        const hash = await bcrypt.hash(password, 10);
+        await adminCollection.findOneAndUpdate({ email }, { $set: { password: hash } });
         return res.redirect("/login");
     }
+
     res.send(`
         <html>
             <body>
-                <p>both are not same</p>
+                <p>Passwords do not match</p>
                 <script>
                     setTimeout(() => {
                         document.getElementById('redirectForm').submit();
-                    }, 1000); // 1-second delay
+                    }, 1000);
                 </script>
-                <form id="redirectForm" action="/new" method="post">
-                </form>
+                <form id="redirectForm" action="/new" method="post"></form>
             </body>
         </html>
     `);
@@ -424,7 +353,7 @@ app.post("/delete", async (req, res) => {
                     <script>
                         setTimeout(() => {
                             document.getElementById('redirectForm').submit();
-                        }, 1000); // 1-second delay
+                        }, 1000);
                     </script>
                     <form id="redirectForm" action="/login" method="post">
                         <input type="hidden" name="which" value="1">
@@ -437,9 +366,6 @@ app.post("/delete", async (req, res) => {
         res.status(500).send("Error deleting order");
     }
 });
-
-
-
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
