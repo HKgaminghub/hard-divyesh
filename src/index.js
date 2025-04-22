@@ -143,12 +143,10 @@ app.post("/login", async (req, res) => {
             if(user.userType=="admin"){
                 req.session.username = req.body.name;
                 req.session.username = 'user_name';  // Replace with actual user data
-                res.redirect("/");
                 return res.render("admin");
             } else {
                 req.session.username = req.body.name;
                 req.session.username = 'user_name';  // Replace with actual user data
-                res.redirect("/");
                 return res.redirect("/");
             }
         } else {
