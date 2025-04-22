@@ -71,14 +71,26 @@ app.post("/orders", async (req, res) => {
 });
 
 app.post("/order", async (req, res) => {
-    const { productId } = req.body;
-    const product = await stockCollection.findById(productId);
 
-    res.render("order", {
-        productName : product.productName,
-        image: product.image,
-        buyingPrice: product.buyingPrice
-    });
+
+    if (req.session.username) {
+        const { productId } = req.body;
+        const product = await stockCollection.findById(productId);
+
+        res.render("order", {
+            productName : product.productName,
+            image: product.image,
+            buyingPrice: product.buyingPrice
+        });
+    }
+    else(
+        res.redirect("/login")
+    )
+
+
+
+
+    
 });
 
 app.post("/signup", async (req, res) => {
@@ -114,11 +126,13 @@ app.get("/signup", async (req,res) => {
 });
 
 app.post("/login", async (req, res) => {
-    if (req.body.which==1){
-        const orders = await orderCollection.find({},{_id: 1, userName: 1,productName: 1, quantity: 1, Address: 1, phoneNumber: 1})
-        return res.render("orders", {orders});
+    // Handle orders logic
+    if (req.body.which == 1) {
+        const orders = await orderCollection.find({}, { _id: 1, userName: 1, productName: 1, quantity: 1, Address: 1, phoneNumber: 1 });
+        return res.render("orders", { orders });  // Return here to avoid further code execution
     }
 
+    // Handle products logic
     if (req.body.which == 2) {
         const products = await stockCollection.find({}, { _id: 1, productName: 1, quantity: 1, buyingPrice: 1, sellingPrice: 1, category: 1, quantityType: 1, image: 1 });
 
@@ -127,36 +141,43 @@ app.post("/login", async (req, res) => {
             image: product.image ? `data:image/png;base64,${product.image.toString('base64')}` : null
         }));
 
-        return res.render("myproduct", { products: modifiedProducts });
+        return res.render("myproduct", { products: modifiedProducts });  // Return here to avoid further code execution
     }
 
     try {
         const user = await adminCollection.findOne({ name: req.body.name });
 
         if (!user) {
-            return res.send("User not found.");
+            return res.send("User not found.");  // Return early to prevent further code execution
         }
 
         const isPasswordMatch = await bcrypt.compare(req.body.password, user.password);
 
         if (isPasswordMatch) {
-            if(user.userType=="admin"){
-                req.session.username = req.body.name;
-                req.session.username = 'user_name';  // Replace with actual user data
-                return res.render("admin");
+            // Generate a new session ID for the user
+            const sessionId = crypto.randomBytes(16).toString('hex');
+            await adminCollection.updateOne({ name: req.body.name }, { $set: { sessionId: sessionId } });
+
+            // Store session information
+            req.session.username = req.body.name;  // Set username in session
+            req.session.sessionId = sessionId;  // Store sessionId in session
+
+            // Redirect or render based on user type
+            if (user.userType === "admin") {
+                return res.render("admin");  // Render admin dashboard
             } else {
-                req.session.username = req.body.name;
-                req.session.username = 'user_name';  // Replace with actual user data
-                return res.redirect("/");
+                return res.redirect("/");  // Redirect to user home page
             }
         } else {
-            return res.send("Wrong password.");
+            return res.send("Wrong password.");  // Return early to prevent further code execution
         }
     } catch (error) {
         console.error(error);
-        res.status(500).send("Error logging in.");
+        return res.status(500).send("Error logging in.");  // Handle any error with a response
     }
 });
+
+
 
 app.post("/admin", upload.single("image"), async (req, res) => {
     console.log("Headers:", req.headers);
