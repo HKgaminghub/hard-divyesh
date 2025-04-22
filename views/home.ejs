@@ -118,15 +118,16 @@
         <h2>ShopEasy</h2>
         <h1>Welcome to ShopEasy</h1>
         <div>
-            <% if (USERNAME=="") {%>
-                <a href="/">Home</a>
-                <a href="/login">Login</a>
-            <% }else{ %>
+            <% if (USERNAME) { %> <!-- Check if USERNAME exists (i.e., user is logged in) -->
                 <a href="/">Home</a>
                 <a href="/logout">LogOut</a>
+            <% } else { %> <!-- If no username, show Login option -->
+                <a href="/">Home</a>
+                <a href="/login">Login</a>
             <% } %>
         </div>
     </div>
+    
     
 
 

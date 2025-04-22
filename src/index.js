@@ -57,19 +57,8 @@ app.get("/logout", (req, res) => {
         if (err) {
             return res.status(500).send("Error logging out");
         }
-        res.send(`
-            <html>
-                <body>
-                    <p>Logging out.....</p>
-                    <script>
-                        setTimeout(() => {
-                            document.getElementById('redirectForm').submit();
-                        }, 1000);
-                    </script>
-                    <form id="redirectForm" action="/" method="get"></form>
-                </body>
-            </html>
-        `);
+        res.clearCookie("connect.sid"); // Clear session cookie
+        res.redirect("/"); // Redirect to home after logout
     });
 });
 
@@ -153,9 +142,13 @@ app.post("/login", async (req, res) => {
         if (isPasswordMatch) {
             if(user.userType=="admin"){
                 req.session.username = req.body.name;
+                req.session.username = 'user_name';  // Replace with actual user data
+                res.redirect("/");
                 return res.render("admin");
             } else {
                 req.session.username = req.body.name;
+                req.session.username = 'user_name';  // Replace with actual user data
+                res.redirect("/");
                 return res.redirect("/");
             }
         } else {
