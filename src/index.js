@@ -11,6 +11,16 @@ const { orderCollection } = require("./confing");
 const { OTPCollection } = require("./confing"); 
 let USERNAME = "";
 
+const session = require("express-session");
+
+app.use(session({
+    secret: 'your_secret_key', // use something more secure in production
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 3600000 } // 1 hour
+}));
+
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -41,30 +51,35 @@ app.get("/", async (req, res) => {
     try {
         const products = await stockCollection.find({}, { image: 1, buyingPrice:1, sellingPrice:1, productName:1 , productId:1}).limit(100);  // Fetch first 10 products (or adjust as needed)
 
-        res.render("home", { products, USERNAME});
+        res.render("home", { products, USERNAME: req.session.username });
     } catch (error) {
         console.error(error);
         res.status(500).send("Error fetching products.");
     }
 });
 
-app.get("/logout", async (req, res) => {
-    USERNAME="";
-    res.send(`
-        <html>
-            <body>
-                <p>Loging out.....</p>
-                <script>
-                    setTimeout(() => {
-                        document.getElementById('redirectForm').submit();
-                    }, 1000); // 1-second delay
-                </script>
-                <form id="redirectForm" action="/" method="get">
-                </form>
-            </body>
-        </html>
-    `);
+app.get("/logout", (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).send("Error logging out");
+        }
+        res.send(`
+            <html>
+                <body>
+                    <p>Logging out.....</p>
+                    <script>
+                        setTimeout(() => {
+                            document.getElementById('redirectForm').submit();
+                        }, 1000);
+                    </script>
+                    <form id="redirectForm" action="/" method="get">
+                    </form>
+                </body>
+            </html>
+        `);
+    });
 });
+
 
 app.get("/login", (req, res) => {
     res.render("login");
@@ -159,11 +174,13 @@ app.post("/login", async (req, res) => {
         
         if (isPasswordMatch) {
             if(user.userType=="admin"){
-                USERNAME = req.body.name;
+                req.session.username = req.body.name;
+
                 return res.render("admin");
             }
             else{
-                USERNAME = req.body.name;
+                req.session.username = req.body.name;
+
                 return res.redirect("/");
             }
         } else {
@@ -201,7 +218,7 @@ app.post("/admin", upload.single("image"), async (req, res) => {
 
 app.post("/orderPlace", async (req, res)=>{
     const data = {
-        userName: USERNAME,
+        userName: req.session.username,
         productName: req.body.productName,
         quantity: req.body.quantity,
         Address: req.body.Address,
