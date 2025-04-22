@@ -1,4 +1,6 @@
 const express = require('express');
+const app = express(); 
+const express = require('express');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
@@ -11,15 +13,9 @@ const { orderCollection } = require("./confing");
 const { OTPCollection } = require("./confing"); 
 let USERNAME = "";
 
+
+
 const session = require("express-session");
-
-app.use(session({
-    secret: 'your_secret_key', // use something more secure in production
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 3600000 } // 1 hour
-}));
-
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -29,10 +25,17 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const session = require("express-session");
 
-const app = express();
+app.use(session({
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 3600000 }
+}));
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });    
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
