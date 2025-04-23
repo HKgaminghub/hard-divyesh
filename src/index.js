@@ -45,7 +45,9 @@ console.log("OTPCollection Model:", OTPCollection);
 app.get("/", async (req, res) => {
     try {
         const products = await stockCollection.find({}, { image: 1, buyingPrice:1, sellingPrice:1, productName:1 , productId:1}).limit(100);
-        res.render("home", { products, USERNAME: req.session.username });
+        const usersID = await adminCollection.findOne({ "name": req.session.username }, { "email": 1, "_id": 0 });
+        res.render("home", { products, USERNAME: req.session.username,usersID });
+        // console.log(usersID);
     } catch (error) {
         console.error(error);
         res.status(500).send("Error fetching products.");
@@ -377,6 +379,20 @@ app.post("/delete", async (req, res) => {
         console.error(error);
         res.status(500).send("Error deleting order");
     }
+});
+
+app.get("/add-email", (req, res) => {
+    res.render("add-email");
+});
+
+app.post("/add-email", async (req, res) => {
+    email = req.body.email;
+    await adminCollection.updateOne(
+        { "name": req.session.username },
+        { $set: { "email":  email} }  
+      );
+
+    res.redirect("/");
 });
 
 const port = process.env.PORT || 5000;
